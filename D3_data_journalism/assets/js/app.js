@@ -2,7 +2,7 @@
 var censusData = [];
 
 // Define SVG area dimensions
-var svgWidth = 850;
+var svgWidth = 800;
 var svgHeight = 500;
 
 // Define the chart's margins as an object
@@ -12,6 +12,10 @@ var margin = {
   bottom: 60,
   left: 60,
 };
+
+// Define dimensions of the chart area
+var chartWidth = svgWidth - margin.left - margin.right;
+var chartHeight = svgHeight - margin.top - margin.bottom;
 
 // Select body, append SVG area to it, and set its dimensions
 var svg = d3
@@ -23,11 +27,9 @@ var svg = d3
 // Append a group area, then set its margins
 var chartGroup = svg
   .append("g")
-  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+  .attr("transform", `translate(${margin.left}, ${margin.top})`)
+  .classed("chart", true);
 
-// Define dimensions of the chart area
-var chartWidth = svgWidth - margin.left - margin.right;
-var chartHeight = svgHeight - margin.top - margin.bottom;
 //
 // Initialize the application by reading the data and then
 // call the callback to initialize the graphs
@@ -60,18 +62,32 @@ function init() {
   console.log("init()");
   console.log(censusData);
 
-  // d3.extent returns the an array containing the min and
-  // max values for the property specified
-  var xLinearScale = d3
-    .scaleLinear()
-    .domain(d3.extent(censusData, (data) => data.poverty))
-    .range([0, chartWidth]);
+  // Calculate the extents for x and y based upon the data
+  // the get teh rang between the low and the high
+  var xExtents = d3.extent(censusData, (data) => data.poverty);
+  var xRange = xExtents[1] - xExtents[0];
 
-  // Configure a linear scale with a range between the chartHeight and 0
-  var yLinearScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(censusData, (data) => data.healthcare)])
-    .range([chartHeight, 0]);
+  var yExtents = d3.extent(censusData, (data) => data.healthcare);
+  var yRange = yExtents[1] - yExtents[0];
+
+  // Scale the extents so that the markers don't span over the axis
+  var scalePercent = 0.05;
+  var xDomain = [
+    xExtents[0] - xRange * scalePercent,
+    xExtents[1] + xRange * scalePercent,
+  ];
+  var yDomain = [
+    yExtents[0] - yRange * scalePercent,
+    yExtents[1] + yRange * scalePercent,
+  ];
+
+  // Configure a x linear scale with a range between the 0 and chartWidth
+  var xLinearScale = d3.scaleLinear().domain(xDomain).range([0, chartWidth]);
+
+  // Configure a y linear scale with a range between the chartHeight and 0
+  var yLinearScale = d3.scaleLinear().domain(yDomain).range([chartHeight, 0]);
+
+  console.log(xLinearScale(9.2));
 
   // Create two new functions passing the scales in as arguments
   // These will be used to create the chart's axes
@@ -79,12 +95,36 @@ function init() {
   var leftAxis = d3.axisLeft(yLinearScale);
 
   // Draw the axes
-  chartGroup.append("g").call(leftAxis);
 
   chartGroup
     .append("g")
     .attr("transform", `translate(0, ${chartHeight})`)
     .call(bottomAxis);
+
+  chartGroup.append("g").call(leftAxis);
+
+  var radius = 14;
+
+  var circles = chartGroup
+    .selectAll("circle")
+    .data(censusData)
+    .enter()
+    .append("circle")
+    .classed("stateCircle", true)
+    .attr("cx", (d) => xLinearScale(d.poverty))
+    .attr("cy", (d) => yLinearScale(d.healthcare))
+    .attr("r", radius)
+    .attr("opacity", "0.5");
+
+  var circleLabels = chartGroup
+    .selectAll(null)
+    .data(censusData)
+    .enter()
+    .append("text")
+    .classed("stateText", true)
+    .attr("x", (d) => xLinearScale(d.poverty))
+    .attr("y", (d) => yLinearScale(d.healthcare) + (radius / 2 - 1))
+    .text((d) => d.abbr);
 }
 
 initApp(init);
