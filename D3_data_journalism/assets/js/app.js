@@ -103,6 +103,18 @@ function init() {
   // Draw the y axis
   chartGroup.append("g").call(leftAxis);
 
+  // Add a tool tip to the bubbles
+  var tool_tip = d3
+    .tip()
+    .attr("class", "d3-tip")
+    .offset([-8, 0])
+    .html(function (d) {
+      return `${d.state}<br/>Poverty: ${d.poverty}<br/>Healthcare: ${d.healthcare}`;
+    });
+
+  // Attach the tool tip to svg
+  svg.call(tool_tip);
+
   // Set the circle radius
   var radius = 14;
 
@@ -116,7 +128,9 @@ function init() {
     .attr("cx", (d) => xLinearScale(d.poverty))
     .attr("cy", (d) => yLinearScale(d.healthcare))
     .attr("r", radius)
-    .attr("opacity", "0.5");
+    .attr("opacity", "0.5")
+    .on("mouseover", tool_tip.show)
+    .on("mouseout", tool_tip.hide);
 
   // Draw the state abbr on the circles
   var circleLabels = chartGroup
@@ -127,24 +141,32 @@ function init() {
     .classed("stateText", true)
     .attr("x", (d) => xLinearScale(d.poverty))
     .attr("y", (d) => yLinearScale(d.healthcare) + (radius / 2 - 1))
-    .text((d) => d.abbr);
+    .text((d) => d.abbr)
+    .on("mouseover", tool_tip.show)
+    .on("mouseout", tool_tip.hide);
 
   var yLabel = chartGroup
     .append("text")
     .attr("transform", "rotate(-90)")
+    .attr("id", "healthcare")
     .attr("y", 0 - margin.left + 30)
     .attr("x", 0 - chartHeight / 2)
-    .classed("aText", true)
-    .text("Lacks Healthcare (%)");
+    .classed("active", true)
+    .text("Lacks Healthcare (%)")
+    .on("click", updateScatter);
 
   var xLabel = chartGroup
     .append("text")
-    .attr(
-      "transform",
-      `translate(${chartWidth / 2}, ${chartHeight + 40})`
-    )
-    .classed("aText", true)
-    .text("In Poverty (%)");
+    .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 40})`)
+    .attr("id", "poverty")
+    .classed("active", true)
+    .text("In Poverty (%)")
+    .on("click", updateScatter);
+}
+
+function updateScatter() {
+  var element = d3.select(this);
+  console.log(element.attr("id"));
 }
 
 initApp(init);
