@@ -94,17 +94,19 @@ function init() {
   var bottomAxis = d3.axisBottom(xLinearScale);
   var leftAxis = d3.axisLeft(yLinearScale);
 
-  // Draw the axes
-
+  // Draw the x axis
   chartGroup
     .append("g")
     .attr("transform", `translate(0, ${chartHeight})`)
     .call(bottomAxis);
 
+  // Draw the y axis
   chartGroup.append("g").call(leftAxis);
 
+  // Set the circle radius
   var radius = 14;
 
+  // Draw the circles
   var circles = chartGroup
     .selectAll("circle")
     .data(censusData)
@@ -116,6 +118,7 @@ function init() {
     .attr("r", radius)
     .attr("opacity", "0.5");
 
+  // Draw the state abbr on the circles
   var circleLabels = chartGroup
     .selectAll(null)
     .data(censusData)
@@ -125,6 +128,23 @@ function init() {
     .attr("x", (d) => xLinearScale(d.poverty))
     .attr("y", (d) => yLinearScale(d.healthcare) + (radius / 2 - 1))
     .text((d) => d.abbr);
+
+  var yLabel = chartGroup
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left + 30)
+    .attr("x", 0 - chartHeight / 2)
+    .classed("aText", true)
+    .text("Lacks Healthcare (%)");
+
+  var xLabel = chartGroup
+    .append("text")
+    .attr(
+      "transform",
+      `translate(${chartWidth / 2}, ${chartHeight + 40})`
+    )
+    .classed("aText", true)
+    .text("In Poverty (%)");
 }
 
 initApp(init);
