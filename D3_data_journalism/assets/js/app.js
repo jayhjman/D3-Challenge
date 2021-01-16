@@ -1,6 +1,9 @@
 // declare the census data
 var censusData = [];
 
+var xAttribute = "poverty";
+var yAttribute = "healthcare";
+
 // Define SVG area dimensions
 var svgWidth = 800;
 var svgHeight = 500;
@@ -12,6 +15,9 @@ var margin = {
   bottom: 60,
   left: 60,
 };
+
+var circles = null;
+var circleLabels = null;
 
 // Define dimensions of the chart area
 var chartWidth = svgWidth - margin.left - margin.right;
@@ -59,35 +65,11 @@ function initApp(callback) {
 // initialize the scatter plot
 //
 function init() {
-  console.log("init()");
-  console.log(censusData);
-
-  // Calculate the extents for x and y based upon the data
-  // the get teh rang between the low and the high
-  var xExtents = d3.extent(censusData, (data) => data.poverty);
-  var xRange = xExtents[1] - xExtents[0];
-
-  var yExtents = d3.extent(censusData, (data) => data.healthcare);
-  var yRange = yExtents[1] - yExtents[0];
-
-  // Scale the extents so that the markers don't span over the axis
-  var scalePercent = 0.05;
-  var xDomain = [
-    xExtents[0] - xRange * scalePercent,
-    xExtents[1] + xRange * scalePercent,
-  ];
-  var yDomain = [
-    yExtents[0] - yRange * scalePercent,
-    yExtents[1] + yRange * scalePercent,
-  ];
-
   // Configure a x linear scale with a range between the 0 and chartWidth
-  var xLinearScale = d3.scaleLinear().domain(xDomain).range([0, chartWidth]);
+  var xLinearScale = getLinearScale(censusData, xAttribute, [0, chartWidth]);
 
   // Configure a y linear scale with a range between the chartHeight and 0
-  var yLinearScale = d3.scaleLinear().domain(yDomain).range([chartHeight, 0]);
-
-  console.log(xLinearScale(9.2));
+  var yLinearScale = getLinearScale(censusData, yAttribute, [chartHeight, 0]);
 
   // Create two new functions passing the scales in as arguments
   // These will be used to create the chart's axes
@@ -119,28 +101,28 @@ function init() {
   var radius = 14;
 
   // Draw the circles
-  var circles = chartGroup
+  circles = chartGroup
     .selectAll("circle")
     .data(censusData)
     .enter()
     .append("circle")
     .classed("stateCircle", true)
-    .attr("cx", (d) => xLinearScale(d.poverty))
-    .attr("cy", (d) => yLinearScale(d.healthcare))
+    .attr("cx", (d) => xLinearScale(d[xAttribute]))
+    .attr("cy", (d) => yLinearScale(d[yAttribute]))
     .attr("r", radius)
     .attr("opacity", "0.5")
     .on("mouseover", tool_tip.show)
     .on("mouseout", tool_tip.hide);
 
   // Draw the state abbr on the circles
-  var circleLabels = chartGroup
+  circleLabels = chartGroup
     .selectAll(null)
     .data(censusData)
     .enter()
     .append("text")
     .classed("stateText", true)
-    .attr("x", (d) => xLinearScale(d.poverty))
-    .attr("y", (d) => yLinearScale(d.healthcare) + (radius / 2 - 1))
+    .attr("x", (d) => xLinearScale(d[xAttribute]))
+    .attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1))
     .text((d) => d.abbr)
     .on("mouseover", tool_tip.show)
     .on("mouseout", tool_tip.hide);
@@ -162,6 +144,25 @@ function init() {
     .classed("active", true)
     .text("In Poverty (%)")
     .on("click", updateScatter);
+}
+
+//
+// Generic linear scale function to be used to update the scales
+//
+function getLinearScale(data, attribute, axRange) {
+  // Calculate the extents
+  var extents = d3.extent(data, (d) => d[attribute]);
+  var extRange = extents[1] - extents[0];
+
+  // Going to scale by 5%
+  var scalePercent = 0.05;
+  var domain = [
+    extents[0] - extRange * scalePercent,
+    extents[1] + extRange * scalePercent,
+  ];
+
+  // Return the linear scale
+  return d3.scaleLinear().domain(domain).range(axRange);
 }
 
 function updateScatter() {
