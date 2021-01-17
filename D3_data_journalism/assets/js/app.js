@@ -16,7 +16,7 @@ var margin = {
   top: 60,
   right: 60,
   bottom: 100,
-  left: 60,
+  left: 90,
 };
 
 var circles = null;
@@ -132,14 +132,35 @@ function init() {
 
   // Add the three x labels with on click events
   // healthcare
-  var yLabel = chartGroup
+  var yLabel1 = chartGroup
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("id", "healthcare")
-    .attr("y", 0 - margin.left + 30)
+    .attr("y", 0 - margin.left + 60)
     .attr("x", 0 - chartHeight / 2)
     .classed("active", true)
     .text("Lacks Healthcare (%)")
+    .on("click", updateYScatter);
+
+  // smokes
+  var yLabel2 = chartGroup
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("id", "smokes")
+    .attr("y", 0 - margin.left + 40)
+    .attr("x", 0 - chartHeight / 2)
+    .classed("inactive", true)
+    .text("Smokes (%)")
+    .on("click", updateYScatter);
+
+  var yLabel3 = chartGroup
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("id", "obesity")
+    .attr("y", 0 - margin.left + 20)
+    .attr("x", 0 - chartHeight / 2)
+    .classed("inactive", true)
+    .text("Obese (%)")
     .on("click", updateYScatter);
 
   // Add the three x labels with on click events
@@ -228,9 +249,42 @@ function updateXScatter() {
   circleLabels.attr("x", (d) => xLinearScale(d[xAttribute]));
 }
 
+//
+// Update y scatter handles the y labels on click and
+// displays the appropriate y axis and y positions on the
+// chart
+//
 function updateYScatter() {
   var element = d3.select(this);
-  console.log(element.attr("id"));
+
+  var clickedElement = element.attr("id");
+
+  // if they click on the same element do nothing
+  if (clickedElement === xAttribute) {
+    return;
+  }
+
+  console.log(yAttribute);
+  console.log(clickedElement);
+
+  d3.select(`#${yAttribute}`).classed("inactive", true);
+  d3.select(`#${clickedElement}`).attr("class", "active");
+
+  yAttribute = clickedElement;
+
+  // Get new linear scale for attribute selected
+  var yLinearScale = getLinearScale(censusData, yAttribute, [chartHeight, 0]);
+  var leftAxis = d3.axisLeft(yLinearScale);
+
+  // Replace bottom axis with new data scale
+  var yaxis = chartGroup.select("#yaxis");
+  yaxis.call(leftAxis);
+
+  // Update circles y position
+  circles.attr("cy", (d) => yLinearScale(d[yAttribute]));
+
+  // Update circle lables x position
+  circleLabels.attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1));
 }
 
 initApp(init);
