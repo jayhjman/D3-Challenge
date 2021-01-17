@@ -1,6 +1,7 @@
 // declare the census data
-var censusData = [];
+var censusData = null;
 
+// Default attributes to display
 var xAttribute = "poverty";
 var yAttribute = "healthcare";
 
@@ -19,8 +20,12 @@ var margin = {
   left: 90,
 };
 
+// Save the circle elements for later use
 var circles = null;
 var circleLabels = null;
+
+// Define a transition time
+var t = d3.transition().duration(750);
 
 // Define dimensions of the chart area
 var chartWidth = svgWidth - margin.left - margin.right;
@@ -41,13 +46,13 @@ var chartGroup = svg
 
 //
 // Initialize the application by reading the data and then
-// call the callback to initialize the graphs
+// call the callback to initialize the graph
 //
 function initApp(callback) {
   d3.csv("assets/data/data.csv")
     .then(
       (data) => {
-        // Format the date and cast the force value to a number
+        // Cast the values to a number
         data.forEach((element) => {
           element.obesity = +element.obesity;
           element.smokes = +element.smokes;
@@ -97,7 +102,9 @@ function init() {
     .attr("class", "d3-tip")
     .offset([-8, 0])
     .html(function (d) {
-      return `${d.state}<br/>Poverty: ${d.poverty}<br/>Healthcare: ${d.healthcare}`;
+      var xLabel = xAttribute.charAt(0).toUpperCase() + xAttribute.slice(1);
+      var yLabel = yAttribute.charAt(0).toUpperCase() + yAttribute.slice(1);
+      return `${d.state}<br/>${xLabel}: ${d[xAttribute]}<br/>${yLabel}: ${d[yAttribute]}`;
     });
 
   // Attach the tool tip to svg
@@ -217,8 +224,10 @@ function getLinearScale(data, attribute, axRange) {
 // chart
 //
 function updateXScatter() {
+  // Grab the element that trigger the event
   var element = d3.select(this);
 
+  // Each element was assigned a unique it, grab it
   var clickedElement = element.attr("id");
 
   // if they click on the same element do nothing
@@ -226,12 +235,11 @@ function updateXScatter() {
     return;
   }
 
-  console.log(xAttribute);
-  console.log(clickedElement);
-
+  // Flip the active styles
   d3.select(`#${xAttribute}`).classed("inactive", true);
   d3.select(`#${clickedElement}`).attr("class", "active");
 
+  // Update the global xAttribute for housekeeping
   xAttribute = clickedElement;
 
   // Get new linear scale for attribute selected
@@ -240,13 +248,13 @@ function updateXScatter() {
 
   // Replace bottom axis with new data scale
   var xaxis = chartGroup.select("#xaxis");
-  xaxis.call(bottomAxis);
+  xaxis.transition(t).call(bottomAxis);
 
   // Update circles x position
-  circles.attr("cx", (d) => xLinearScale(d[xAttribute]));
+  circles.transition(t).attr("cx", (d) => xLinearScale(d[xAttribute]));
 
   // Update circle lables x position
-  circleLabels.attr("x", (d) => xLinearScale(d[xAttribute]));
+  circleLabels.transition(t).attr("x", (d) => xLinearScale(d[xAttribute]));
 }
 
 //
@@ -255,21 +263,22 @@ function updateXScatter() {
 // chart
 //
 function updateYScatter() {
+  // Grab the element that trigger the event
   var element = d3.select(this);
 
+  // Each element was assigned a unique it, grab it
   var clickedElement = element.attr("id");
 
   // if they click on the same element do nothing
-  if (clickedElement === xAttribute) {
+  if (clickedElement === yAttribute) {
     return;
   }
 
-  console.log(yAttribute);
-  console.log(clickedElement);
-
+  // Flip the active styles
   d3.select(`#${yAttribute}`).classed("inactive", true);
   d3.select(`#${clickedElement}`).attr("class", "active");
 
+  // Update the global xAttribute for housekeeping
   yAttribute = clickedElement;
 
   // Get new linear scale for attribute selected
@@ -278,13 +287,16 @@ function updateYScatter() {
 
   // Replace bottom axis with new data scale
   var yaxis = chartGroup.select("#yaxis");
-  yaxis.call(leftAxis);
+  yaxis.transition(t).call(leftAxis);
 
   // Update circles y position
-  circles.attr("cy", (d) => yLinearScale(d[yAttribute]));
+  circles.transition(t).attr("cy", (d) => yLinearScale(d[yAttribute]));
 
-  // Update circle lables x position
-  circleLabels.attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1));
+  // Update circle lables y position
+  circleLabels
+    .transition(t)
+    .attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1));
 }
 
+// Initialize data and default chart
 initApp(init);
