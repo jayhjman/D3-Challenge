@@ -4,6 +4,9 @@ var censusData = [];
 var xAttribute = "poverty";
 var yAttribute = "healthcare";
 
+// Set the circle radius
+var radius = 14;
+
 // Define SVG area dimensions
 var svgWidth = 800;
 var svgHeight = 500;
@@ -12,7 +15,7 @@ var svgHeight = 500;
 var margin = {
   top: 60,
   right: 60,
-  bottom: 60,
+  bottom: 100,
   left: 60,
 };
 
@@ -46,10 +49,12 @@ function initApp(callback) {
       (data) => {
         // Format the date and cast the force value to a number
         data.forEach((element) => {
-          element.age = +element.age;
+          element.obesity = +element.obesity;
           element.smokes = +element.smokes;
           element.healthcare = +element.healthcare;
           element.poverty = +element.poverty;
+          element.age = +element.age;
+          element.income = +element.income;
         });
 
         censusData = data;
@@ -80,10 +85,11 @@ function init() {
   chartGroup
     .append("g")
     .attr("transform", `translate(0, ${chartHeight})`)
+    .attr("id", "xaxis")
     .call(bottomAxis);
 
   // Draw the y axis
-  chartGroup.append("g").call(leftAxis);
+  chartGroup.append("g").attr("id", "yaxis").call(leftAxis);
 
   // Add a tool tip to the bubbles
   var tool_tip = d3
@@ -96,9 +102,6 @@ function init() {
 
   // Attach the tool tip to svg
   svg.call(tool_tip);
-
-  // Set the circle radius
-  var radius = 14;
 
   // Draw the circles
   circles = chartGroup
@@ -127,6 +130,8 @@ function init() {
     .on("mouseover", tool_tip.show)
     .on("mouseout", tool_tip.hide);
 
+  // Add the three x labels with on click events
+  // healthcare
   var yLabel = chartGroup
     .append("text")
     .attr("transform", "rotate(-90)")
@@ -135,15 +140,35 @@ function init() {
     .attr("x", 0 - chartHeight / 2)
     .classed("active", true)
     .text("Lacks Healthcare (%)")
-    .on("click", updateScatter);
+    .on("click", updateYScatter);
 
-  var xLabel = chartGroup
+  // Add the three x labels with on click events
+  // poverty
+  var xLabel1 = chartGroup
     .append("text")
     .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 40})`)
     .attr("id", "poverty")
     .classed("active", true)
     .text("In Poverty (%)")
-    .on("click", updateScatter);
+    .on("click", updateXScatter);
+
+  // age
+  var xLabel2 = chartGroup
+    .append("text")
+    .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 60})`)
+    .attr("id", "age")
+    .classed("inactive", true)
+    .text("Age (Median)")
+    .on("click", updateXScatter);
+
+  // income
+  var xLabel3 = chartGroup
+    .append("text")
+    .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 80})`)
+    .attr("id", "income")
+    .classed("inactive", true)
+    .text("Household Income (Median)")
+    .on("click", updateXScatter);
 }
 
 //
@@ -165,7 +190,45 @@ function getLinearScale(data, attribute, axRange) {
   return d3.scaleLinear().domain(domain).range(axRange);
 }
 
-function updateScatter() {
+//
+// Update x scatter handles the x labels on click and
+// displays the appropriate x axis and x positions on the
+// chart
+//
+function updateXScatter() {
+  var element = d3.select(this);
+
+  var clickedElement = element.attr("id");
+
+  // if they click on the same element do nothing
+  if (clickedElement === xAttribute) {
+    return;
+  }
+
+  console.log(xAttribute);
+  console.log(clickedElement);
+
+  d3.select(`#${xAttribute}`).classed("inactive", true);
+  d3.select(`#${clickedElement}`).attr("class", "active");
+
+  xAttribute = clickedElement;
+
+  // Get new linear scale for attribute selected
+  var xLinearScale = getLinearScale(censusData, xAttribute, [0, chartWidth]);
+  var bottomAxis = d3.axisBottom(xLinearScale);
+
+  // Replace bottom axis with new data scale
+  var xaxis = chartGroup.select("#xaxis");
+  xaxis.call(bottomAxis);
+
+  // Update circles x position
+  circles.attr("cx", (d) => xLinearScale(d[xAttribute]));
+
+  // Update circle lables x position
+  circleLabels.attr("x", (d) => xLinearScale(d[xAttribute]));
+}
+
+function updateYScatter() {
   var element = d3.select(this);
   console.log(element.attr("id"));
 }
