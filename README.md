@@ -12,7 +12,17 @@
 
 ## Results
 
-![screen_1](D3_data_journalism/assets/images/Screenshot_1-D3.jpg)
+![screen_1.1](D3_data_journalism/assets/images/Screenshot_1.1-D3.jpg)
+
+![screen_1.2](D3_data_journalism/assets/images/Screenshot_1.2-D3.jpg)
+
+![screen_1.3](D3_data_journalism/assets/images/Screenshot_1.3-D3.jpg)
+
+![screen_1.4](D3_data_journalism/assets/images/Screenshot_1.4-D3.jpg)
+
+![screen_1.5](D3_data_journalism/assets/images/Screenshot_1.5-D3.jpg)
+
+![screen_1.6](D3_data_journalism/assets/images/Screenshot_1.6-D3.jpg)
 
 ![screen_2](D3_data_journalism/assets/images/Screenshot_2-D3.jpg)
 
