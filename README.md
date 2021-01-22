@@ -1,6 +1,6 @@
 # Data Journalism
 
-- **_Health Risk Demographics_** - Is based off 2014 ACS 1-year estimates from the [US Census Bureau](https://data.census.gov/cedsci/) and explores health risks that face certain demographics.
+- **_Health Risk Demographics_** - Is based off 2014 ACS 1-year estimates from the [US Census Bureau](https://data.census.gov/cedsci/) and explores health risks that face certain demographics. The idea is to provide an interactive chart that looks at 6 factors, 3x3 comparisions of Poverty, Age and Household Income versus Healthcare, Smoking and Obesity. You can interactively click the x and y axis labels and the charts will dynamically change. You can glean trends from the results and then use them to support the conculsions in a journalistic article.
 
 ## Files
 
