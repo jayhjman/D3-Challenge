@@ -132,7 +132,8 @@ function init() {
     .append("text")
     .classed("stateText", true)
     .attr("x", (d) => xLinearScale(d[xAttribute]))
-    .attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1))
+    .attr("y", (d) => yLinearScale(d[yAttribute]))
+    .attr("dy", "0.4em")
     .text((d) => d.abbr)
     .on("mouseover", tool_tip.show)
     .on("mouseout", tool_tip.hide);
@@ -296,7 +297,8 @@ function updateYScatter() {
   // Update circle lables y position
   circleLabels
     .transition(t)
-    .attr("y", (d) => yLinearScale(d[yAttribute]) + (radius / 2 - 1));
+    .attr("y", (d) => yLinearScale(d[yAttribute]))
+    .attr("dy", "0.4em");
 }
 
 // Initialize data and default chart
