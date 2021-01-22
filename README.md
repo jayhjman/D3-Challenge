@@ -12,6 +12,10 @@
 
 ## Results
 
+![screen_1](D3_data_journalism/assets/images/Screenshot_1-D3.jpg)
+
+![screen_2](D3_data_journalism/assets/images/Screenshot_2-D3.jpg)
+
 ## Execution
 
 1. To view the interactive dashboard page `Cntrl + Click` [here](https://jayhjman.github.io/D3-Challenge/D3_data_journalism/) to open in another tab
