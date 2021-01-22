@@ -160,6 +160,7 @@ function init() {
     .text("Smokes (%)")
     .on("click", updateYScatter);
 
+  // obesity
   var yLabel3 = chartGroup
     .append("text")
     .attr("transform", "rotate(-90)")
