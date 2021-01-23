@@ -45,6 +45,22 @@ var chartGroup = svg
   .classed("chart", true);
 
 //
+// Add a tool tip to the bubbles
+//
+var tool_tip = d3
+  .tip()
+  .attr("class", "d3-tip")
+  .offset([-8, 0])
+  .html(function (d) {
+    var xLabel = xAttribute.charAt(0).toUpperCase() + xAttribute.slice(1);
+    var yLabel = yAttribute.charAt(0).toUpperCase() + yAttribute.slice(1);
+    return `${d.state}<br/>${xLabel}: ${d[xAttribute]}<br/>${yLabel}: ${d[yAttribute]}`;
+  });
+
+// Attach the tool tip to svg
+svg.call(tool_tip);
+
+//
 // Initialize the application by reading the data and then
 // call the callback to initialize the graph
 //
@@ -96,20 +112,6 @@ function init() {
   // Draw the y axis
   chartGroup.append("g").attr("id", "yaxis").call(leftAxis);
 
-  // Add a tool tip to the bubbles
-  var tool_tip = d3
-    .tip()
-    .attr("class", "d3-tip")
-    .offset([-8, 0])
-    .html(function (d) {
-      var xLabel = xAttribute.charAt(0).toUpperCase() + xAttribute.slice(1);
-      var yLabel = yAttribute.charAt(0).toUpperCase() + yAttribute.slice(1);
-      return `${d.state}<br/>${xLabel}: ${d[xAttribute]}<br/>${yLabel}: ${d[yAttribute]}`;
-    });
-
-  // Attach the tool tip to svg
-  svg.call(tool_tip);
-
   // Draw the circles
   circles = chartGroup
     .selectAll("circle")
@@ -121,8 +123,10 @@ function init() {
     .attr("cy", (d) => yLinearScale(d[yAttribute]))
     .attr("r", radius)
     .attr("opacity", "0.5")
-    .on("mouseover", tool_tip.show)
-    .on("mouseout", tool_tip.hide);
+    .attr("id", (d, i) => "ctip" + i)
+    .style("stroke", "transparent")
+    .on("mouseover", inToolTip)
+    .on("mouseout", outToolTip);
 
   // Draw the state abbr on the circles
   circleLabels = chartGroup
@@ -134,11 +138,12 @@ function init() {
     .attr("x", (d) => xLinearScale(d[xAttribute]))
     .attr("y", (d) => yLinearScale(d[yAttribute]))
     .attr("dy", "0.4em")
+    .attr("id", (d, i) => "cltip" + i)
     .text((d) => d.abbr)
-    .on("mouseover", tool_tip.show)
-    .on("mouseout", tool_tip.hide);
+    .on("mouseover", inToolTip)
+    .on("mouseout", outToolTip);
 
-  // Add the three x labels with on click events
+  // Add the three y labels with on click events
   // healthcare
   var yLabel1 = chartGroup
     .append("text")
@@ -199,6 +204,55 @@ function init() {
     .classed("inactive", true)
     .text("Household Income (Median)")
     .on("click", updateXScatter);
+}
+
+//
+// Find the target circle element and either set the border/label
+// to red or clear it out depending on parameter passed
+//
+function setCirleElement(targetElement, highlight) {
+  // get the elements id
+  var element = d3.select(targetElement);
+  var elementSelected = element.attr("id");
+
+  // create some placeholder variables
+  var circleElm = null;
+  var circleLabelElm = null;
+
+  // Check to see if circle or circle label was found
+  if (elementSelected.includes("cltip") == true) {
+    circleLabelElm = elementSelected;
+    circleElm = "ctip" + elementSelected.split("cltip")[1];
+  } else {
+    circleLabelElm = "cltip" + elementSelected.split("ctip")[1];
+    circleElm = elementSelected;
+  }
+
+  // Set the correct circle stroke
+  var targetCircle = d3.select(`#${circleElm}`);
+  targetCircle.style("stroke", highlight ? "red" : "transparent");
+
+  // Set the correct circle label stroke
+  var targetCircleLabel = d3.select(`#${circleLabelElm}`);
+  targetCircleLabel.style("stroke", highlight ? "red" : "transparent");
+}
+
+//
+// Mouseover function for tool tip, it sets up the circle element
+// this shows the tool tip
+//
+function inToolTip(d) {
+  setCirleElement(this, true);
+  tool_tip.show(d, d3.select(this).node());
+}
+
+//
+// Mouseout function for tool tip, it sets up the circle element
+// this hides the tool tip
+//
+function outToolTip(d) {
+  setCirleElement(this, false);
+  tool_tip.hide(d, d3.select(this).node());
 }
 
 //
