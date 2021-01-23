@@ -140,6 +140,7 @@ function init() {
     .attr("dy", "0.4em")
     .attr("id", (d, i) => "cltip" + i)
     .text((d) => d.abbr)
+    .style("stroke", "transparent")
     .on("mouseover", inToolTip)
     .on("mouseout", outToolTip);
 
