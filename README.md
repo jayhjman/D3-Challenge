@@ -24,6 +24,12 @@
 
 ![screen_1.6](D3_data_journalism/assets/images/Screenshot_1.6-D3.jpg)
 
+![screen_1.7](D3_data_journalism/assets/images/Screenshot_1.7-D3.jpg)
+
+![screen_1.8](D3_data_journalism/assets/images/Screenshot_1.8-D3.jpg)
+
+![screen_1.9](D3_data_journalism/assets/images/Screenshot_1.9-D3.jpg)
+
 ![screen_2](D3_data_journalism/assets/images/Screenshot_2-D3.jpg)
 
 ## Execution
