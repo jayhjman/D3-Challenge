@@ -9,8 +9,8 @@ var yAttribute = "healthcare";
 var radius = 14;
 
 // Define SVG area dimensions
-var svgWidth = 800;
-var svgHeight = 500;
+var svgWidth = 1000;
+var svgHeight = 700;
 
 // Define the chart's margins as an object
 var margin = {
@@ -112,22 +112,6 @@ function init() {
   // Draw the y axis
   chartGroup.append("g").attr("id", "yaxis").call(leftAxis);
 
-  // Draw the circles
-  circles = chartGroup
-    .selectAll("circle")
-    .data(censusData)
-    .enter()
-    .append("circle")
-    .classed("stateCircle", true)
-    .attr("cx", (d) => xLinearScale(d[xAttribute]))
-    .attr("cy", (d) => yLinearScale(d[yAttribute]))
-    .attr("r", radius)
-    .attr("opacity", "0.5")
-    .attr("id", (d, i) => "ctip" + i)
-    .style("stroke", "transparent")
-    .on("mouseover", inToolTip)
-    .on("mouseout", outToolTip);
-
   // Draw the state abbr on the circles
   circleLabels = chartGroup
     .selectAll(null)
@@ -140,6 +124,25 @@ function init() {
     .attr("dy", "0.4em")
     .attr("id", (d, i) => "cltip" + i)
     .text((d) => d.abbr)
+    .style("stroke", "transparent");
+
+  //Originally had these here but changed the order of
+  // rendering for accurate event capture
+  // .on("mouseover", inToolTip)
+  // .on("mouseout", outToolTip);
+
+  // Draw the circles
+  circles = chartGroup
+    .selectAll("circle")
+    .data(censusData)
+    .enter()
+    .append("circle")
+    .classed("stateCircle", true)
+    .attr("cx", (d) => xLinearScale(d[xAttribute]))
+    .attr("cy", (d) => yLinearScale(d[yAttribute]))
+    .attr("r", radius)
+    .attr("opacity", "0.5")
+    .attr("id", (d, i) => "ctip" + i)
     .style("stroke", "transparent")
     .on("mouseover", inToolTip)
     .on("mouseout", outToolTip);
