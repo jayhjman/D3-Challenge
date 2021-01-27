@@ -10,7 +10,7 @@ var radius = 14;
 
 // Define SVG area dimensions
 var svgWidth = 1000;
-var svgHeight = 700;
+var svgHeight = 600;
 
 // Define the chart's margins as an object
 var margin = {
